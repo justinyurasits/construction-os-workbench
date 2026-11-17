@@ -10,6 +10,7 @@ from pathlib import Path
 
 import pytest
 
+from construction_os.acceptance import compare_structure
 from construction_os.drafting import FakeDraftingClient, draft_pco, tool_turn
 from construction_os.drafting.client import ModelTurn
 from construction_os.drafting.takeoff import compute
@@ -404,7 +405,8 @@ def test_changing_the_range_point_or_a_waste_factor_changes_the_total(tmp_path, 
     assert base < higher < more_waste
 
 
-# The live script grades an estimating case on structure, not a total (checked here offline, with the fake client)
+# The live script and the acceptance tests grade an estimating case on structure, not a total
+# (construction_os.acceptance; checked here offline, with the fake client)
 
 STRUCTURE = {"exact": {"pricing_structure": {
     "required_scope": [{"item": "demolition", "division": "02", "any_of": ["demolition", "remove"]},
@@ -414,16 +416,9 @@ STRUCTURE = {"exact": {"pricing_structure": {
     "arithmetic": "exact", "estimated_quantities_on_checklist": True}}}
 
 
-def live_eval():
-    import sys
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-    import live_eval
-    return live_eval
-
-
 def test_the_live_script_passes_a_well_structured_estimate(store, package, tmp_path):
     result, _ = run(store, package, tmp_path, with_gc(proposal()))
-    checks, _ = live_eval().compare_structure(STRUCTURE, result, package)
+    checks, _ = compare_structure(STRUCTURE, result, package)
     assert [name for name, *_, passed in checks if not passed] == []
     assert "general conditions rule" in [name for name, *_ in checks]
 
@@ -434,5 +429,5 @@ def test_the_live_script_fails_a_missing_scope_item_or_an_unlisted_source(store,
     expected["exact"]["pricing_structure"]["required_scope"].append(
         {"item": "dust barriers", "division": "01", "any_of": ["dust barrier"]})
     expected["exact"]["pricing_structure"]["every_line_sourced"] = ["rate_table"]
-    checks, _ = live_eval().compare_structure(expected, result, package)
+    checks, _ = compare_structure(expected, result, package)
     assert {name for name, *_, passed in checks if not passed} == {"scope: dust barriers", "every line sourced"}

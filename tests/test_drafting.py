@@ -385,23 +385,26 @@ def test_cli_reports_a_drafting_failure(tmp_path, example_root):
 needs_corpus = pytest.mark.skipif(not CASES.is_dir(), reason="package not found; set CORPUS")
 
 
-def corpus_case(store, name, recorded):
+def corpus_case(store, name, recorded=None):
+    """Replays a proposal for a package case: the case's own recording, or a shaped fixture from RECORDED."""
     corpus = load_package(CORPUS)
     project = store.create(name)
     record = project.add_input("notes", CASES / name / "request.md")
-    client = FakeDraftingClient([tool_turn(json.loads((RECORDED / recorded).read_text()))])
+    proposal = (json.loads((RECORDED / recorded).read_text()) if recorded
+                else json.loads((CASES / name / "recorded_proposal.json").read_text())["proposal"])
+    client = FakeDraftingClient([tool_turn(proposal)])
     return draft_pco(project, corpus, [record], client)
 
 
 @needs_corpus
 def test_case_1_through_the_pipeline_totals_the_expected_amount(store):
-    result = corpus_case(store, "01_added_lighting", "case1_proposal.json")
+    result = corpus_case(store, "01_added_lighting")
     assert result.priced.total == D("5614.40") and "contract_terms_not_applied" not in flag_kinds(result)
 
 
 @needs_corpus
 def test_case_4_through_the_pipeline_prices_at_company_standard_and_flags_the_contract(store):
-    result = corpus_case(store, "04_exterior_door_contract_pricing", "case4_proposal.json")
+    result = corpus_case(store, "04_exterior_door_contract_pricing")
     assert result.priced.total == D("6129.00")
     assert result.flags[0].kind == "contract_terms_not_applied"
 
@@ -497,7 +500,7 @@ def test_cli_takes_correspondence_and_drawings(tmp_path, example_root):
 
 @needs_corpus
 def test_case_1_checklist_has_one_item_per_fact(store):
-    result = corpus_case(store, "01_added_lighting", "case1_proposal.json")
+    result = corpus_case(store, "01_added_lighting")
     lines = [l for l in document_text(result.checklist_path).split("\n") if l.startswith("☐")]
     normalized = [" ".join(l.lower().split()) for l in lines]
     assert len(set(normalized)) == len(normalized)
@@ -586,7 +589,7 @@ def test_cli_takes_a_selection(tmp_path, example_root):
 
 @needs_corpus
 def test_case_1_has_one_written_quote_item_per_quoted_line(store):
-    result = corpus_case(store, "01_added_lighting", "case1_proposal.json")
+    result = corpus_case(store, "01_added_lighting")
     text = document_text(result.checklist_path)
     assert [l for l in text.split("\n") if "Written quote on file" in l] == [
         "☐  Written quote on file: Electrician's quote", "☐  Written quote on file: Drywall subcontractor's quote",
