@@ -1,15 +1,15 @@
 # Document workbench
 
-The Construction OS document workbench: the application that generates governed construction documents from a customer package, and reads only that package. The first customer package is `construction-os-corpus`, next to this repository.
+The Construction OS document workbench: the application that generates governed construction documents from a customer package, and reads only that package. The first customer package is `construction-os-corpus`, next to this repository. Status: active.
 
-The design docs are in [`construction-os-design`](https://github.com/justinyurasits/construction-os-design/tree/main/construction-os/document-workbench). The build spec is `../construction-os-design/construction-os/document-workbench/pco-design.md`.
+The design docs are in [`design`](https://github.com/justinyurasits/design/tree/main/construction-os/document-workbench). The build spec is `../design/construction-os/document-workbench/pco-design.md`.
 
 Clone the three repositories side by side:
 
 ```
 construction-os-corpus/
-construction-os-design/
-document-workbench/
+construction-os-workbench/
+design/
 ```
 
 The Python package is still named `construction_os`; renaming it is a separate change.
