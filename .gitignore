@@ -11,3 +11,7 @@ samples/rendered/
 build/
 .DS_Store
 /projects/
+
+# Editor
+.vscode/
+.idea/
