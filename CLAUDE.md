@@ -23,11 +23,13 @@ Before proposing work, read in this order (skip any the project doesn't have yet
 2. `../design/construction-os/product-spec.md`: what the product must do, by capability ID
 3. `../design/construction-os/architecture.md` and `principles.md`: how the parts fit, and
    the rules every design decision follows
-4. `../design/construction-os/document-workbench/spec.md`: what this component must do
-5. `../design/construction-os/document-workbench/design.md`: how it works, and the decision log
-6. `../design/construction-os/document-workbench/<slice>-design.md`: the build design for the slice
+4. `../design/construction-os/corpus/spec.md`: the domain
+5. `../design/construction-os/document-workbench/spec.md`: a pointer to the corpus spec, and
+   this component's boundaries
+6. `../design/construction-os/document-workbench/design.md`: how it works, and the decision log
+7. `../design/construction-os/document-workbench/<slice>-design.md`: the build design for the slice
    the issue belongs to (today: `pco-design.md`)
-7. `../design/construction-os/document-workbench/plan.md`: the milestones still ahead
+8. `../design/construction-os/document-workbench/plan.md`: the milestones still ahead
 
 - **Design leads, code follows.** Never edit design docs from this repository. If the
   work needs a change to what the product does, to a requirement or to the architecture,
@@ -70,8 +72,10 @@ Fill in `.github/pull_request_template.md`:
 issue or milestone is done, and about every ten turns of work since you last asked.
 
 - On yes: collect Decisions and Build notes from pull requests merged since the last
-  roll-up (the latest "Roll-up:" line in the component's `build-log.md`). Propose
-  decisions for the `design.md` decision log and findings for `build-log.md`, ending with
+  roll-up (the latest "Roll-up:" line in
+  `../design/construction-os/document-workbench/build-log.md`). Propose decisions for the
+  decision log in `../design/construction-os/document-workbench/design.md` and findings for
+  `../design/construction-os/document-workbench/build-log.md`, ending with
   the line `Roll-up: <repo> #<first>–#<last>`. For files synced from Claude Docs, add
   them as suggestions in the Claude Doc if you have the Docs connector; otherwise give
   Justin the text to paste. For repo-authored files, open a pull request in `design`.
@@ -111,4 +115,6 @@ issue or milestone is done, and about every ten turns of work since you last ask
     produces that company's documents.
   - Code computes every amount; the model never writes a price.
   - The Python package is still named `construction_os`; renaming it is its own issue.
-- **Overrides:** none.
+- **Overrides:** section 2 adds the corpus spec to the reading list and section 6 names the
+  roll-up files by path, because the corpus is its own component (design PR #25) and its
+  spec is specific to Construction OS, not the template.
