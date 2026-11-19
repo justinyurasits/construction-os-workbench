@@ -98,7 +98,8 @@ issue or milestone is done, and about every ten turns of work since you last ask
 ## 7. This repository
 
 - **Layout:** `src/construction_os/` is the package: `drafting/`, `pricing/`, `rendering/`,
-  `projects/` (the project store), `conditions.py`, `draft.py` (the drafting CLI) and
+  `projects/` (the project store), `acceptance.py` (grading against the package's
+  acceptance cases), `conditions.py`, `draft.py` (the drafting CLI) and
   `validate.py` (the package validator);
   `schemas/` holds JSON schemas; `scripts/` holds tools that are never run in CI
   (`live_eval.py`); `tests/` holds the tests and `tests/fixtures/`, a fictional company.

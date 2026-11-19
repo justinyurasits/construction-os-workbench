@@ -62,7 +62,7 @@ Claude proposes the scope, quantities and cited amounts; code checks the proposa
 - **Model:** `DRAFT_MODEL` or `--model` (default `claude-opus-5-5`); `DRAFT_EFFORT` or `--effort` (default `high`). Not secrets.
 - **Project store:** `PROJECTS_DIR` or `--projects-dir` (default `~/construction-os/projects`). One folder per project: `project.yaml`, `inputs/` (as supplied, read-only) and `drafts/v001/` … (`draft.json`, `proposal.json`, `pco.docx`, `checklist.docx`, `manifest.json`). The store refuses a root inside the package, or inside a Git repository unless it's gitignored (`/projects/` is, here).
 
-`scripts/live_eval.py` runs the package's acceptance cases through the real API and compares totals and flags with `expected.yaml`, with elapsed time and tokens. It is never run in CI.
+`scripts/live_eval.py` runs the package's acceptance cases through the real API and grades them against `expected.yaml`, with elapsed time and tokens. It is never run in CI. `--runs N` drafts each case N times; `--record` saves a fully passing run's proposal as the case's `recorded_proposal.json` in the package. The grading code is `construction_os.acceptance`, shared with the tests.
 
 ## PCO layout
 
@@ -74,4 +74,4 @@ The PCO opens with a branded first page (logo and company name from the profile)
 .venv/bin/pytest
 ```
 
-Unit tests use the fictional company in `tests/fixtures/`. Drafting tests use a fake Claude client with recorded output; no test builds the real client or loads `.env` (`tests/conftest.py` refuses both). Tests in `test_package.py` and `test_acceptance_cases.py` read the sample drafts and acceptance cases from the package (`CORPUS`, default `../construction-os-corpus`), and skip if it isn't there.
+Unit tests use the fictional company in `tests/fixtures/`. Drafting tests use a fake Claude client with recorded output; no test builds the real client or loads `.env` (`tests/conftest.py` refuses both). Tests in `test_package.py` and `test_acceptance_cases.py` read the sample drafts and acceptance cases from the package (`CORPUS`, default `../construction-os-corpus`), and skip if it isn't there. Each draft case with a `recorded_proposal.json` is replayed through the pipeline and graded offline; the test warns when a recording predates the current prompt.

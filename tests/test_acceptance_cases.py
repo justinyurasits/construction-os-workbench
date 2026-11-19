@@ -1,13 +1,23 @@
-"""Checks the package's acceptance cases themselves; grading waits for the drafting pipeline."""
+"""Checks the package's acceptance cases themselves, then grades the drafting pipeline on each one.
+
+Grading replays the case's recorded_proposal.json (a live model proposal, kept in the package) through the
+pipeline with a fake client: no test calls the API. It proves the code turns that proposal into the expected
+result; scripts/live_eval.py checks that the model still produces such a proposal.
+"""
 import json
 import os
 import re
+import warnings
 from decimal import Decimal
 from pathlib import Path
 
 import pytest
 import yaml
 
+from construction_os.acceptance import RECORDING, grade, load_recording
+from construction_os.drafting import FakeDraftingClient, draft_pco, proposal_schema, tool_turn
+from construction_os.drafting.config import prompt_version
+from construction_os.projects import FileProjectStore
 from construction_os.rendering import load_package, render
 from docx_helpers import summary_rows
 
@@ -42,7 +52,9 @@ def test_case_has_exact_and_judged_results(case):
     data = expected(case)
     assert data["mode"] in ("draft", "advice")
     assert data["exact"]["document"] and data["judged"]
-    assert sorted(p.name for p in case.iterdir()) == ["expected.yaml", "request.md"]
+    files = sorted(p.name for p in case.iterdir())
+    assert files in (["expected.yaml", "request.md"], ["expected.yaml", RECORDING, "request.md"])
+    assert data["mode"] == "draft" or RECORDING not in files
 
 
 @pytest.mark.parametrize("case", priced_cases(), ids=lambda c: c.name)
@@ -136,5 +148,24 @@ def test_company_values_match_the_package(case):
 
 
 @pytest.mark.parametrize("case", CASES, ids=lambda c: c.name)
-def test_grade_the_pipeline_response(case):
-    pytest.skip("the drafting pipeline doesn't exist yet (build step 5)")
+def test_grade_the_pipeline_response(tmp_path, case):
+    data = expected(case)
+    if data["mode"] == "advice":
+        pytest.skip("advice case: the advisor path isn't built yet (build step 7)")
+    recording = load_recording(case)
+    if recording is None:
+        pytest.skip(f"no {RECORDING} in the package yet; record one with scripts/live_eval.py --record")
+    current = prompt_version(json.dumps(proposal_schema(), sort_keys=True))
+    if recording["recorded"]["prompt_version"] != current:
+        warnings.warn(f"{case.name}: recorded under prompt {recording['recorded']['prompt_version']}, "
+                      f"now {current}; rerun scripts/live_eval.py --record to refresh it")
+    package = load_package(CORPUS)
+    project = FileProjectStore(tmp_path, forbidden=[package.root]).create(case.name)
+    record = project.add_input("notes", case / "request.md")
+    result = draft_pco(project, package, [record], FakeDraftingClient([tool_turn(recording["proposal"])]))
+    checks, _ = grade(data, result, package)
+    failed = [f"{name}: expected {want}; got {got}" for name, want, got, passed in checks if not passed]
+    assert not failed, "\n".join(failed)
+    if "pricing" in data["exact"] and "explains_difference" not in data["exact"]:
+        rows = summary_rows(result.docx_path)
+        assert rows["Total"] == f"${Decimal(data['exact']['pricing']['total']):,.2f}"
