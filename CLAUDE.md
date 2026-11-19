@@ -1,6 +1,6 @@
 # construction-os-workbench
 
-<!-- standard: design/_template/repo/CLAUDE.md v1
+<!-- standard: design/_template/repo/CLAUDE.md v1.3
      Sections 1–6 are the standard: copy them unchanged, filling in only the <angle brackets>.
      Section 7 is this repository's own. To change a standard rule here, say so under
      "Overrides" in section 7, with the reason. -->
@@ -15,7 +15,8 @@ Status: active.
 ## 2. Design
 
 The design docs for this repository are in the `design` repository, cloned next to this
-one, at `../design/construction-os/document-workbench/`. Pull it before planning.
+one, at `../design/construction-os/document-workbench/`. Pull it before planning. In a git worktree,
+`../design` means next to the main checkout, not next to the worktree.
 
 Before proposing work, read in this order (skip any the project doesn't have yet):
 
@@ -24,11 +25,11 @@ Before proposing work, read in this order (skip any the project doesn't have yet
 3. `../design/construction-os/architecture.md` and `principles.md`: how the parts fit, and
    the rules every design decision follows
 4. `../design/construction-os/corpus/spec.md`: the domain
-5. `../design/construction-os/document-workbench/spec.md`: a pointer to the corpus spec, and
-   this component's boundaries
+5. `../design/construction-os/document-workbench/brief.md` and `spec.md`: who this component is for, and its spec (a pointer to
+   the corpus spec, plus this component's boundaries)
 6. `../design/construction-os/document-workbench/design.md`: how it works, and the decision log
-7. `../design/construction-os/document-workbench/<slice>-design.md`: the build design for the slice
-   the issue belongs to (today: `pco-design.md`)
+7. `../design/construction-os/document-workbench/<slice>-design.md`: the build design for the slice the issue belongs to
+   (today: `pco-design.md`)
 8. `../design/construction-os/document-workbench/plan.md`: the milestones still ahead
 
 - **Design leads, code follows.** Never edit design docs from this repository. If the
@@ -79,6 +80,11 @@ issue or milestone is done, and about every ten turns of work since you last ask
   the line `Roll-up: <repo> #<first>–#<last>`. For files synced from Claude Docs, add
   them as suggestions in the Claude Doc if you have the Docs connector; otherwise give
   Justin the text to paste. For repo-authored files, open a pull request in `design`.
+- Every roll-up also checks for drift. For each synced file in the component and its
+  project, compare the `rev` in its `sync-manifest.yaml` with the Claude Doc's current
+  revision, and offer a sync pull request in `design` for any doc that has moved ahead.
+  Without the Docs connector, list those docs and their links from `../design/DOCS.md`
+  and ask Justin to check them.
 - On no: don't ask again for another ten turns.
 - Nothing enters the design record until Justin approves it.
 
@@ -117,5 +123,5 @@ issue or milestone is done, and about every ten turns of work since you last ask
   - Code computes every amount; the model never writes a price.
   - The Python package is still named `construction_os`; renaming it is its own issue.
 - **Overrides:** section 2 adds the corpus spec to the reading list and section 6 names the
-  roll-up files by path, because the corpus is its own component (design PR #25) and its
+  roll-up files by path (both re-applied on v1.3), because the corpus is its own component (design PR #25) and its
   spec is specific to Construction OS, not the template.
